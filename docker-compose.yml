@@ -1,0 +1,33 @@
+name: wireguard-vpn
+
+services:
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy:latest
+    container_name: wg-easy
+    environment:
+      # IP pública estática de AWS Lightsail o dominio DDNS
+      - WG_HOST=${WG_HOST:-CAMBIAR_POR_TU_IP_PUBLICA}
+      # Contraseña para ingresar al panel Web UI (http://TU_IP:51821)
+      - PASSWORD=${PASSWORD:-admin12345}
+      # Puerto interno de la Web UI
+      - PORT=51821
+      # Puerto UDP de WireGuard
+      - WG_PORT=${WG_PORT:-51820}
+      # Servidores DNS predeterminados para los clientes de la VPN
+      - WG_DEFAULT_DNS=${WG_DEFAULT_DNS:-1.1.1.1, 8.8.8.8}
+      # Tráfico redirigido a través de la VPN (0.0.0.0/0 redirige todo el tráfico por la VPN)
+      - WG_ALLOWED_IPS=${WG_ALLOWED_IPS:-0.0.0.0/0, ::/0}
+      # Mantener conexión activa enviando paquetes keepalive cada 25s
+      - WG_PERSISTENT_KEEPALIVE=25
+    volumes:
+      - ./etc_wireguard:/etc/wireguard
+    ports:
+      - "${WG_PORT:-51820}:51820/udp"
+      - "51821:51821/tcp"
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv4.ip_forward=1
+    restart: unless-stopped
