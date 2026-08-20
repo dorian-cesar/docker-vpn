@@ -25,7 +25,8 @@ fi
 # 2. Actualizar paquetes del sistema
 echo -e "${GREEN}[1/5] Actualizando repositorio del sistema...${NC}"
 apt-get update -y
-apt-get install -y curl ca-certificates gnupg lsb-release iptables
+apt-get install -y curl ca-certificates gnupg lsb-release iptables wireguard wireguard-tools
+modprobe wireguard 2>/dev/null || true
 
 # 3. Habilitar Reenvío de IP (IPv4 Forwarding) en Sysctl
 echo -e "${GREEN}[2/5] Configurando el Kernel de Linux (ip_forward=1)...${NC}"
