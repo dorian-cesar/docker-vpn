@@ -61,6 +61,21 @@ if [ -f ".env" ]; then
         echo -e "${YELLOW}Detectada IP Pública de Lightsail: ${PUBLIC_IP}${NC}"
         sed -i "s/WG_HOST=TU_IP_PUBLICA_LIGHTSAIL/WG_HOST=${PUBLIC_IP}/g" .env
     fi
+
+    # Generar PASSWORD_HASH si solo existe PASSWORD en texto plano
+    if grep -q "^PASSWORD=" .env && ! grep -q "^PASSWORD_HASH=" .env; then
+        PLAIN_PASS=$(grep "^PASSWORD=" .env | cut -d'=' -f2- | tr -d '\r')
+        if [ -n "$PLAIN_PASS" ]; then
+            echo -e "${GREEN}Generando hash bcrypt para la contraseña (wg-easy v14)...${NC}"
+            docker pull ghcr.io/wg-easy/wg-easy:latest >/dev/null 2>&1 || true
+            GENERATED_HASH=$(docker run --rm ghcr.io/wg-easy/wg-easy wgpw "$PLAIN_PASS" 2>/dev/null | tr -d '\r\n')
+            if [ -n "$GENERATED_HASH" ]; then
+                # Escapar el signo $ para docker compose si no tiene comillas simples
+                echo "PASSWORD_HASH='$GENERATED_HASH'" >> .env
+                echo -e "${GREEN}Hash de contraseña generado correctamente.${NC}"
+            fi
+        fi
+    fi
 fi
 
 # 6. Levantar el servicio con Docker Compose

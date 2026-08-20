@@ -7,8 +7,8 @@ services:
     environment:
       # IP pública estática de AWS Lightsail o dominio DDNS
       - WG_HOST=${WG_HOST:-CAMBIAR_POR_TU_IP_PUBLICA}
-      # Contraseña para ingresar al panel Web UI (http://TU_IP:51821)
-      - PASSWORD=${PASSWORD:-admin12345}
+      # Hash bcrypt para ingresar al panel Web UI (http://TU_IP:51821)
+      - PASSWORD_HASH=${PASSWORD_HASH}
       # Puerto interno de la Web UI
       - PORT=51821
       # Puerto UDP de WireGuard
